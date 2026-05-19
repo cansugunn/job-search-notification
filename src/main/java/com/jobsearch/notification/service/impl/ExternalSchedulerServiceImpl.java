@@ -111,7 +111,8 @@ public class ExternalSchedulerServiceImpl implements ExternalSchedulerService {
 
           try {
             List<JobPostingSummaryDto> jobPostingSummaryDtoList =
-                fetchAllPages(jobSearchHistoryDto.position(), jobSearchHistoryDto.city(), jobSearchHistoryDto.town());
+                fetchAllPages(jobSearchHistoryDto.position(), jobSearchHistoryDto.country(),
+                              jobSearchHistoryDto.city(), jobSearchHistoryDto.town());
             for (JobPostingSummaryDto job : jobPostingSummaryDtoList) {
               if (notificationRepository.existsByUserIdAndJobId(userId, job.id())) {
                 continue;
@@ -156,13 +157,14 @@ public class ExternalSchedulerServiceImpl implements ExternalSchedulerService {
     return all;
   }
 
-  private List<JobPostingSummaryDto> fetchAllPages(String position, String city, String townId) {
+  private List<JobPostingSummaryDto> fetchAllPages(String position, String countryName,
+                                                    String cityName, String townName) {
     List<JobPostingSummaryDto> all = new ArrayList<>();
     int page = 0;
     int size = 250;
     PageResponse<JobPostingSummaryDto> response;
     do {
-      response = jobSearchPublicClient.searchJobs(position, city, townId, page++, size);
+      response = jobSearchPublicClient.searchJobs(position, countryName, cityName, townName, page++, size);
       all.addAll(response.content());
     } while (!response.last());
     return all;

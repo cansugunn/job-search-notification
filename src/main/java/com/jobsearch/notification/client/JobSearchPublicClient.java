@@ -12,8 +12,9 @@ public interface JobSearchPublicClient {
   @GetExchange("/api/v1/jobs")
   PageResponse<JobPostingSummaryDto> searchJobs(
       @RequestParam(required = false) String position,
-      @RequestParam(required = false) String city,
-      @RequestParam(required = false) String townId,
+      @RequestParam(required = false) String countryName,
+      @RequestParam(required = false) String cityName,
+      @RequestParam(required = false) String townName,
       @RequestParam int page,
       @RequestParam int size);
 }

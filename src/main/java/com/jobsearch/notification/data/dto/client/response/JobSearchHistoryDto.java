@@ -8,6 +8,7 @@ public record JobSearchHistoryDto(String userId,
                                   String position,
                                   String town,
                                   String city,
+                                  String country,
                                   String workingPreference,
                                   LocalDateTime searchedAt) {
 
