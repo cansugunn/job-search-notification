@@ -1,6 +1,7 @@
 package com.jobsearch.notification.controller;
 
 import com.jobsearch.notification.service.ExternalSchedulerService;
+import com.jobsearch.notification.validator.ExternalSchedulerValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -21,13 +22,16 @@ import static com.jobsearch.notification.data.constants.ExternalSchedulerConstan
      description = "Endpoints triggered by external scheduler")
 public class ExternalSchedulerController {
 
+  private final ExternalSchedulerValidator externalSchedulerValidator;
+
   private final ExternalSchedulerService externalSchedulerService;
 
   @Operation(summary = "Process job alert notifications")
   @PostMapping("/job-alerts")
   public ResponseEntity<Void>
   triggerJobAlerts(@RequestHeader(value = SCHEDULER_HEADER) String secret) {
-    externalSchedulerService.processJobAlerts(secret);
+    externalSchedulerValidator.validateSecret(secret);
+    externalSchedulerService.processJobAlerts();
     return ResponseEntity.ok().build();
   }
 
@@ -35,7 +39,8 @@ public class ExternalSchedulerController {
   @PostMapping("/related-jobs")
   public ResponseEntity<Void>
   triggerRelatedJobs(@RequestHeader(value = SCHEDULER_HEADER) String secret) {
-    externalSchedulerService.processRelatedJobs(secret);
+    externalSchedulerValidator.validateSecret(secret);
+    externalSchedulerService.processRelatedJobs();
     return ResponseEntity.ok().build();
   }
 }

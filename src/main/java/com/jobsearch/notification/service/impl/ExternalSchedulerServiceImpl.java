@@ -13,7 +13,6 @@ import com.jobsearch.notification.data.repository.JobAlertRepository;
 import com.jobsearch.notification.data.repository.NotificationRepository;
 import com.jobsearch.notification.messaging.JobPostingConsumer;
 import com.jobsearch.notification.service.ExternalSchedulerService;
-import com.jobsearch.notification.validator.ExternalSchedulerValidator;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,8 +33,6 @@ public class ExternalSchedulerServiceImpl implements ExternalSchedulerService {
 
   private static final int SEARCH_HISTORY_DAYS = 7;
 
-  private final ExternalSchedulerValidator externalSchedulerValidator;
-
   private final JobPostingConsumer jobPostingConsumer;
 
   private final JobAlertRepository jobAlertRepository;
@@ -49,9 +46,7 @@ public class ExternalSchedulerServiceImpl implements ExternalSchedulerService {
   @Transactional
   @Async
   @Override
-  public void processJobAlerts(String schedulerSecret) {
-    externalSchedulerValidator.validateSecret(schedulerSecret);
-
+  public void processJobAlerts() {
     log.info("Processing job alerts at {}", LocalDateTime.now());
     List<NewJobPostingEvent> newJobPostingEventList = jobPostingConsumer.drainQueue();
     if (newJobPostingEventList.isEmpty()) {
@@ -94,9 +89,7 @@ public class ExternalSchedulerServiceImpl implements ExternalSchedulerService {
   @Transactional
   @Async
   @Override
-  public void processRelatedJobs(String schedulerSecret) {
-    externalSchedulerValidator.validateSecret(schedulerSecret);
-
+  public void processRelatedJobs() {
     log.info("Processing related jobs at {}", LocalDateTime.now());
     try {
       List<JobSearchHistoryDto> jobSearchHistoryDtoList = fetchAllSearchPages();
@@ -154,7 +147,7 @@ public class ExternalSchedulerServiceImpl implements ExternalSchedulerService {
   private List<JobSearchHistoryDto> fetchAllSearchPages() {
     List<JobSearchHistoryDto> all = new ArrayList<>();
     int page = 0;
-    int size = 550;
+    int size = 250;
     PageResponse<JobSearchHistoryDto> response;
     do {
       response = jobSearchAdminClient.getAllJobSearches(SEARCH_HISTORY_DAYS, page++, size);
@@ -166,7 +159,7 @@ public class ExternalSchedulerServiceImpl implements ExternalSchedulerService {
   private List<JobPostingSummaryDto> fetchAllPages(String position, String city, String townId) {
     List<JobPostingSummaryDto> all = new ArrayList<>();
     int page = 0;
-    int size = 550;
+    int size = 250;
     PageResponse<JobPostingSummaryDto> response;
     do {
       response = jobSearchPublicClient.searchJobs(position, city, townId, page++, size);
