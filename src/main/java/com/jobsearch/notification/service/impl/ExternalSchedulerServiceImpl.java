@@ -1,6 +1,5 @@
 package com.jobsearch.notification.service.impl;
 
-import com.jobsearch.notification.client.JobSearchAdminClient;
 import com.jobsearch.notification.client.JobSearchPublicClient;
 import com.jobsearch.notification.data.document.JobAlert;
 import com.jobsearch.notification.data.document.Notification;
@@ -10,6 +9,7 @@ import com.jobsearch.notification.data.dto.client.response.PageResponse;
 import com.jobsearch.notification.data.enums.NotificationType;
 import com.jobsearch.notification.data.event.NewJobPostingEvent;
 import com.jobsearch.notification.data.repository.JobAlertRepository;
+import com.jobsearch.notification.data.repository.JobSearchHistoryMongoRepository;
 import com.jobsearch.notification.data.repository.NotificationRepository;
 import com.jobsearch.notification.messaging.JobPostingConsumer;
 import com.jobsearch.notification.service.ExternalSchedulerService;
@@ -31,7 +31,7 @@ import static java.util.Objects.isNull;
 @RequiredArgsConstructor
 public class ExternalSchedulerServiceImpl implements ExternalSchedulerService {
 
-  private static final int SEARCH_HISTORY_DAYS = 7;
+  private static final int SEARCH_HISTORY_DAYS = 1;
 
   private final JobPostingConsumer jobPostingConsumer;
 
@@ -39,7 +39,7 @@ public class ExternalSchedulerServiceImpl implements ExternalSchedulerService {
 
   private final NotificationRepository notificationRepository;
 
-  private final JobSearchAdminClient jobSearchAdminClient;
+  private final JobSearchHistoryMongoRepository jobSearchHistoryMongoRepository;
 
   private final JobSearchPublicClient jobSearchPublicClient;
 
@@ -148,15 +148,7 @@ public class ExternalSchedulerServiceImpl implements ExternalSchedulerService {
   }
 
   private List<JobSearchHistoryDto> fetchAllSearchPages() {
-    List<JobSearchHistoryDto> all = new ArrayList<>();
-    int page = 0;
-    int size = 250;
-    PageResponse<JobSearchHistoryDto> response;
-    do {
-      response = jobSearchAdminClient.getAllJobSearches(SEARCH_HISTORY_DAYS, page++, size);
-      all.addAll(response.content());
-    } while (!response.last());
-    return all;
+    return jobSearchHistoryMongoRepository.findSearchesSince(LocalDateTime.now().minusDays(SEARCH_HISTORY_DAYS));
   }
 
   private List<JobPostingSummaryDto> fetchAllPages(String position, String countryName,
