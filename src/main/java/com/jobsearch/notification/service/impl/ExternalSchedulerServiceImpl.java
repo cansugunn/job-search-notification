@@ -118,9 +118,11 @@ public class ExternalSchedulerServiceImpl implements ExternalSchedulerService {
                 continue;
               }
 
-              String message = String.format("Based on your search for \"%s\" in %s, check out: \"%s\"",
+              String message = String.format("Based on your search for \"%s\"%s, check out: \"%s\"",
                                              jobSearchHistoryDto.position(),
-                                             jobSearchHistoryDto.location(),
+                                             jobSearchHistoryDto.location()
+                                                     .map(location -> " in "+location)
+                                                     .orElse(""),
                                              job.title());
               Notification notification = Notification.builder()
                                                       .userId(userId)
